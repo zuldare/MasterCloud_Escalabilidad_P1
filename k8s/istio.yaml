@@ -1,0 +1,49 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+      - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: istio-virtual-service
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: webapp
+            port:
+              number: 8080
+      timeout: 3s          # request has a timeout of x seconds
+      retries:
+        attempts: 3        # number of attemps
+        perTryTimeout: 2s  #fails if it takes more than 3 seconds
+#  http:
+#  - match:
+#    - uri:
+#        prefix: /
+#  - route:
+#    - destination:
+#        host: webapp
+#        port:
+#          number: 8080
+#    retries:
+#      attempts: 3
+#      perTryTimeout: 2s
